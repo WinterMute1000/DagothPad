@@ -74,14 +74,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
             }
 
+            String fileName=dagothField[filedIndex].getName();
+
             Button newButton=new Button(this);
-            newButton.setText(dagothField[filedIndex].getName());
+            newButton.setText(fileName);
             newButton.setLayoutParams(new TableLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT));
-            int soundId=getResources().getIdentifier(resName,dagothField[filedIndex].getName(),packageName); //Get soundFiles ID
+            int soundId=getResources().getIdentifier(resName,fileName,packageName); //Get soundFiles ID
             newButton.setTag(dagothSoundPool.load(this,soundId,1)); //Save sound in the buttonTag
             newButton.setOnClickListener(this);
 
             tr.addView(newButton);
+
+            filedIndex++;
         }
     }
 
