@@ -2,13 +2,15 @@ package com.morrowwind.redmountaiondagoth;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
@@ -21,24 +23,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     static final int NUM_COLUMNS=3;
     private Field[] dagothField=R.raw.class.getFields();
     private int fieldLength=dagothField.length;
-    private SoundPool dagothSoundPool=new SoundPool(fieldLength,AudioManager.STREAM_MUSIC,0);
+    private SoundPool dagothSoundPool;
+    private int preSound=-1;
     private int filedIndex=0;
+
+    @Override
+    protected  void onStart()
+    {
+        super.onStart();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+            dagothSoundPool = new SoundPool.Builder().setAudioAttributes(audioAttributes).setMaxStreams(fieldLength).build();
+        }
+        else {
+            dagothSoundPool = new SoundPool(fieldLength, AudioManager.STREAM_NOTIFICATION, 0);
+        }
+
+        TableLayout padTable=findViewById(R.id.padTable);
+        makeTable(padTable);
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        //InitializeSoundPool();
         setContentView(R.layout.activity_main);
-        TableLayout padTable=(TableLayout)findViewById(R.id.padTable);
-        makeTable(padTable);
 
     }
 
-    /*private void InitializeSoundPool()
-    {
-    }
-    */
 
     protected void makeTable(TableLayout padTable) //Make rows
     {
@@ -80,8 +96,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String fileResourceName="@raw/"+fileName;
 
             Button newButton=new Button(this);
-            newButton.setText(fileName);
-            newButton.setTextSize(8.5f);
+            newButton.setTransformationMethod(null);
+            newButton.setText(makeButtonText(fileName));
+            newButton.setTextSize(10.0f);
             int soundId=getResources().getIdentifier(fileResourceName,dirName,packageName); //Get soundFiles ID
             newButton.setTag(dagothSoundPool.load(this,soundId,1)); //Save sound in the buttonTag
             newButton.setOnClickListener(this);
@@ -92,13 +109,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    protected String makeButtonText(String fileName)
+    {
+        String buttonText=new String();
+        buttonText=fileName;
+
+        buttonText.toLowerCase();
+        buttonText=buttonText.substring(0,1).toUpperCase()+buttonText.substring(1).replace('_',' ');
+
+        if(fileName.endsWith("god1"))
+            buttonText=buttonText.replace('1','!');
+        else if(fileName.endsWith("god2"))
+        {
+            buttonText = buttonText.replace('2', '!');
+            buttonText += '!';
+        }
+        else if(fileName=="sweet_nerevar")
+            buttonText+="♥"; //Dagoth loves nerevar?
+
+        return buttonText;
+    }
+
     @Override
-    public void onClick(View v) //if button, play music!
+    public void onClick(View v) //if view is button, play music!
     {
         if(v instanceof Button)
         {
+            if(preSound !=-1)
+                dagothSoundPool.stop(preSound);
 
-            dagothSoundPool.play((int)v.getTag(),1.0F,1.0F,1,0,1.0F);
+            preSound=dagothSoundPool.play((int) v.getTag(), 1.0F, 1.0F, 1, 0, 1.0F);
         }
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+
+        dagothSoundPool.release();
+        dagothSoundPool=null;
     }
 }
