@@ -2,15 +2,20 @@ package com.morrowwind.redmountaiondagoth;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.graphics.Point;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.TypedValue;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
@@ -43,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         TableLayout padTable=findViewById(R.id.padTable);
+        padTable.setShrinkAllColumns(true);
+        padTable.setStretchAllColumns(true);
         makeTable(padTable);
 
     }
@@ -74,8 +81,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
            }
 
            TableRow newTr=new TableRow(this);
+           TableLayout.LayoutParams p=new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT);
+           p.weight = 1;
+           padTable.addView(newTr,p);
            makeTableRow(newTr);
-           padTable.addView(newTr,new TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT));
        }
     }
 
@@ -98,12 +107,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Button newButton=new Button(this);
             newButton.setTransformationMethod(null);
             newButton.setText(makeButtonText(fileName));
-            newButton.setTextSize(10.0f);
+            newButton.setHeight(tr.getHeight());
+            newButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
             int soundId=getResources().getIdentifier(fileResourceName,dirName,packageName); //Get soundFiles ID
             newButton.setTag(dagothSoundPool.load(this,soundId,1)); //Save sound in the buttonTag
             newButton.setOnClickListener(this);
 
             tr.addView(newButton);
+            newButton.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,TableRow.LayoutParams.MATCH_PARENT));
 
             filedIndex++;
         }
@@ -143,11 +154,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onStop()
+    protected void onStop()
     {
         super.onStop();
 
         dagothSoundPool.release();
         dagothSoundPool=null;
     }
+
 }
