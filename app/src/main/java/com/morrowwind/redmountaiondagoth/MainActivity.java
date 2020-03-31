@@ -113,8 +113,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             newButton.setTag(dagothSoundPool.load(this,soundId,1)); //Save sound in the buttonTag
             newButton.setOnClickListener(this);
 
-            tr.addView(newButton);
             newButton.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,TableRow.LayoutParams.MATCH_PARENT));
+            tr.addView(newButton);
+
 
             filedIndex++;
         }
